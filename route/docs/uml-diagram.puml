@@ -1,0 +1,82 @@
+@startuml uml-diagram
+title Маршрут құру — Strategy паттерні
+
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+skinparam shadowing false
+skinparam class {
+  BackgroundColor #FDFDFD
+  BorderColor #444444
+  ArrowColor #444444
+}
+
+class Main {
+  + {static} main(args : String[]) : void
+}
+
+class Navigator <<Context>> {
+  - strategy : RouteStrategy
+  + Navigator(strategy : RouteStrategy)
+  + setStrategy(strategy : RouteStrategy) : void
+  + buildRoute(from : String, to : String, distanceKm : double) : RouteResult
+}
+
+interface RouteStrategy <<Strategy>> {
+  + buildRoute(from : String, to : String, distanceKm : double) : RouteResult
+}
+
+class WalkingStrategy <<ConcreteStrategy>> {
+  - {static} SPEED_KMH : double = 5.0
+  + buildRoute(from : String, to : String, distanceKm : double) : RouteResult
+}
+
+class CarStrategy <<ConcreteStrategy>> {
+  - {static} SPEED_KMH : double = 40.0
+  - {static} LITERS_PER_100KM : double = 8.0
+  - {static} FUEL_PRICE : double = 300.0
+  + buildRoute(from : String, to : String, distanceKm : double) : RouteResult
+}
+
+class PublicTransportStrategy <<ConcreteStrategy>> {
+  - {static} SPEED_KMH : double = 20.0
+  - {static} WAITING_MINUTES : double = 7.0
+  - {static} FARE : double = 120.0
+  + buildRoute(from : String, to : String, distanceKm : double) : RouteResult
+}
+
+class RouteResult {
+  - mode : String
+  - from : String
+  - to : String
+  - distanceKm : double
+  - timeMinutes : double
+  - cost : double
+  + RouteResult(mode, from, to, distanceKm, timeMinutes, cost)
+  + getMode() : String
+  + getTimeMinutes() : double
+  + getCost() : double
+  + toString() : String
+}
+
+Main ..> Navigator : пайдаланады
+Main ..> WalkingStrategy : жасайды
+Main ..> CarStrategy : жасайды
+Main ..> PublicTransportStrategy : жасайды
+
+Navigator o--> "1" RouteStrategy : strategy
+
+RouteStrategy <|.. WalkingStrategy
+RouteStrategy <|.. CarStrategy
+RouteStrategy <|.. PublicTransportStrategy
+
+RouteStrategy ..> RouteResult : қайтарады
+Navigator ..> RouteResult
+
+note right of Navigator
+  Context: нақты стратегияны білмейді,
+  тек RouteStrategy интерфейсіне сүйенеді.
+  setStrategy() арқылы тәсіл
+  жұмыс кезінде ауыстырылады.
+end note
+
+@enduml
